@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Vocabulary Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #764ba2;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .card-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 800px;
+            width: 100%;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .card-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-front, .card-back {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .card-back {
+            display: none;
+        }
+        
+        .card-front.hidden {
+            display: none;
+        }
+        
+        .card-back.visible {
+            display: block;
+        }
+        
+        .word {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .meaning {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .reading {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .example {
+            font-size: 18px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .example-reading {
+            font-size: 16px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .example-translation {
+            font-size: 16px;
+            color: #888;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .card-image {
+            max-width: 300px;
+            max-height: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+        
+        .navigation {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .progress {
+            margin-top: 10px;
+            font-size: 18px;
+            color: white;
+            text-align: center;
+        }
+        
+        .debug-panel {
+            background: #263238;
+            color: #aed581;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 800px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .debug-panel h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .debug-line {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #4caf50;
+            padding-left: 10px;
+        }
+        
+        .debug-error {
+            border-left-color: #f44336;
+            color: #ffcdd2;
+        }
+        
+        .debug-warning {
+            border-left-color: #ff9800;
+            color: #ffe0b2;
+        }
+        
+        .flip-hint {
+            color: #999;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .audio-btn {
+            background: #4CAF50;
+            padding: 8px 16px;
+            margin: 10px 5px;
+        }
+        
+        .audio-btn:hover {
+            background: #45a049;
+        }
+        
+        .setup-instructions {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .setup-instructions h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .setup-instructions ol, .setup-instructions ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+        
+        .setup-instructions code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .file-upload-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f8ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .file-input {
+            margin: 20px 0;
+            padding: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: white;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin: 20px;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .highlight {
+            background: #fff9c4;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-instructions" id="setupInstructions">
+        <h2>📦 ZIP File Setup Instructions</h2>
+        
+        <div class="highlight">
+            <strong>✨ New: Upload a ZIP file with everything included!</strong>
+        </div>
+        
+        <h3>Step 1: Export from Anki</h3>
+        <ol>
+            <li>In Anki Desktop: <code>File → Export</code></li>
+            <li>Choose <strong>"Notes in Plain Text"</strong></li>
+            <li>✅ Check <strong>"Include HTML and media references"</strong></li>
+            <li>Save the .txt file (e.g., <code>cards.txt</code>)</li>
+        </ol>
+        
+        <h3>Step 2: Find Your Media Files</h3>
+        <p>Your Anki media folder location:</p>
+        <ul>
+            <li><strong>Windows:</strong> <code>C:\Users\YourName\AppData\Roaming\Anki2\YourProfile\collection.media\</code></li>
+            <li><strong>Mac:</strong> <code>~/Library/Application Support/Anki2/YourProfile/collection.media/</code></li>
+        </ul>
+        
+        <h3>Step 3: Create a ZIP File</h3>
+        <ol>
+            <li>Create a new folder (e.g., <code>anki-deck</code>)</li>
+            <li>Copy your exported .txt file into this folder</li>
+            <li>Copy ALL media files (.jpg, .mp3, etc.) from <code>collection.media</code> into the same folder</li>
+            <li>Zip the entire folder (Right-click → Compress/Send to → Compressed folder)</li>
+        </ol>
+        
+        <h3>Step 4: Upload Below</h3>
+        
+        <div class="file-upload-section">
+            <h3>📂 Load Your ZIP File</h3>
+            <p>Select your ZIP file containing the .txt export and all media:</p>
+            <input type="file" id="zipInput" class="file-input" accept=".zip" />
+            <br>
+            <button onclick="loadZipFile()">Load ZIP File</button>
+            <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                <strong>Note:</strong> Large ZIP files (100MB+) may take a minute to load. Please be patient!
+            </p>
+        </div>
+        
+        <div id="errorMessage" class="error" style="display:none;"></div>
+    </div>
+    
+    <div class="loading" id="loadingMessage" style="display:none;">
+        <div id="loadingText">Loading your flashcards... Please wait.</div>
+        <div id="loadingProgress" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="header" style="display:none;" id="appHeader">
+        <h1>Japanese Vocabulary Flashcards</h1>
+        <div class="controls">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by word or meaning...">
+            <button onclick="searchCards()">Search</button>
+            <button onclick="resetSearch()">Show All</button>
+            <button onclick="shuffleCards()">Shuffle</button>
+            <button onclick="showDebugPanel()" style="background:#ff9800;">🔍 Debug</button>
+        </div>
+        <div class="navigation" style="display:none; margin-top: 15px; justify-content: center;" id="navigation">
+            <button onclick="previousCard()">← Previous</button>
+            <button onclick="flipCard()">Flip Card</button>
+            <button onclick="nextCard()">Next →</button>
+        </div>
+    </div>
+
+    <div class="card-container" style="display:none;" id="cardContainer" onclick="flipCard()">
+        <div class="card-front" id="cardFront">
+            <div class="word" id="word"></div>
+            <div class="flip-hint">Tap to see answer</div>
+        </div>
+        
+        <div class="card-back" id="cardBack">
+            <div class="word" id="wordBack"></div>
+            <div class="meaning" id="meaning"></div>
+            <div class="reading" id="reading"></div>
+            <div id="audioButtons"></div>
+            <img class="card-image" id="cardImage" style="display:none;">
+            <div class="example" id="exampleSection" style="display:none;">
+                <div id="example"></div>
+                <div class="example-reading" id="exampleReading"></div>
+                <div class="example-translation" id="exampleTranslation"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation" style="display:none;" id="navigation">
+        <button onclick="previousCard()">← Previous</button>
+        <button onclick="flipCard()">Flip Card</button>
+        <button onclick="nextCard()">Next →</button>
+        <button onclick="showDebugPanel()" style="background:#ff9800;">🔍 Show Debug Info</button>
+    </div>
+
+    <div class="progress" style="display:none;" id="progress"></div>
+    
+    <div class="debug-panel" style="display:none;" id="debugPanel">
+        <h3>🔍 Debug Information</h3>
+        <button onclick="document.getElementById('debugPanel').style.display='none'" style="float:right;">Close</button>
+        <div id="debugContent"></div>
+    </div>
+
+    <!-- JSZip Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        let cards = [];
+        let currentCardIndex = 0;
+        let isFlipped = false;
+        let filteredCards = [];
+        let mediaFiles = {}; // Store media as data URLs
+        let debugLog = [];
+
+        function addDebugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push({ time: timestamp, message, type });
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function showDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            const content = document.getElementById('debugContent');
+            
+            let html = '';
+            debugLog.forEach(log => {
+                const className = log.type === 'error' ? 'debug-error' : 
+                                 log.type === 'warning' ? 'debug-warning' : 'debug-line';
+                html += `<div class="${className}">[${log.time}] ${log.message}</div>`;
+            });
+            
+            content.innerHTML = html;
+            panel.style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function updateLoadingProgress(message) {
+            document.getElementById('loadingProgress').textContent = message;
+        }
+
+        async function loadZipFile() {
+            const zipInput = document.getElementById('zipInput');
+            const file = zipInput.files[0];
+            
+            debugLog = []; // Clear previous logs
+            addDebugLog('=== Starting ZIP file load ===');
+            addDebugLog(`File selected: ${file ? file.name : 'none'}`);
+            
+            if (!file) {
+                showError('Please select a ZIP file first!');
+                return;
+            }
+            
+            if (!file.name.endsWith('.zip')) {
+                showError('Please select a ZIP file (.zip extension)');
+                return;
+            }
+            
+            addDebugLog(`File size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+            
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('setupInstructions').style.display = 'none';
+            updateLoadingProgress('Reading ZIP file...');
+            
+            try {
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(file);
+                
+                addDebugLog('ZIP file loaded successfully');
+                updateLoadingProgress('Extracting files...');
+                
+                let txtFile = null;
+                const mediaFilesFound = [];
+                
+                // Find the .txt file and all media files
+                addDebugLog('Scanning ZIP contents...');
+                for (const [filename, fileObj] of Object.entries(contents.files)) {
+                    if (fileObj.dir) {
+                        addDebugLog(`Skipping directory: ${filename}`);
+                        continue;
+                    }
+                    
+                    const basename = filename.split('/').pop();
+                    addDebugLog(`Found file: ${basename} (path: ${filename})`);
+                    
+                    if (basename.endsWith('.txt')) {
+                        txtFile = fileObj;
+                        addDebugLog(`✓ TXT file found: ${basename}`, 'info');
+                    } else if (basename.match(/\.(jpg|jpeg|png|gif|mp3|wav|ogg)$/i)) {
+                        mediaFilesFound.push({ name: basename, file: fileObj });
+                    }
+                }
+                
+                addDebugLog(`Total media files found: ${mediaFilesFound.length}`);
+                
+                if (!txtFile) {
+                    throw new Error('No .txt file found in ZIP. Make sure your Anki export is included!');
+                }
+                
+                updateLoadingProgress(`Found ${mediaFilesFound.length} media files. Loading text file...`);
+                
+                // Read the text file
+                const csvText = await txtFile.async('text');
+                addDebugLog(`TXT file loaded: ${csvText.length} characters`);
+                
+                // Load media files
+                updateLoadingProgress(`Loading media files (0/${mediaFilesFound.length})...`);
+                
+                for (let i = 0; i < mediaFilesFound.length; i++) {
+                    const media = mediaFilesFound[i];
+                    try {
+                        const blob = await media.file.async('blob');
+                        const dataUrl = await blobToDataURL(blob);
+                        mediaFiles[media.name] = dataUrl;
+                        
+                        if (i < 5) {
+                            addDebugLog(`✓ Loaded media: ${media.name} (${blob.type}, ${(blob.size/1024).toFixed(1)}KB)`);
+                        }
+                    } catch (err) {
+                        addDebugLog(`✗ Failed to load: ${media.name} - ${err.message}`, 'error');
+                    }
+                    
+                    if (i % 50 === 0) {
+                        updateLoadingProgress(`Loading media files (${i}/${mediaFilesFound.length})...`);
+                    }
+                }
+                
+                addDebugLog(`Total media files loaded into memory: ${Object.keys(mediaFiles).length}`);
+                addDebugLog('Sample filenames in memory:');
+                Object.keys(mediaFiles).slice(0, 10).forEach(name => {
+                    addDebugLog(`  - ${name}`);
+                });
+                
+                updateLoadingProgress('Parsing cards...');
+                
+                // Parse cards
+                parseAndInitialize(csvText);
+                
+            } catch (error) {
+                console.error('Error loading ZIP:', error);
+                addDebugLog(`ERROR: ${error.message}`, 'error');
+                addDebugLog(`Stack: ${error.stack}`, 'error');
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('setupInstructions').style.display = 'block';
+                showError('Error loading ZIP file: ' + error.message);
+                showDebugPanel();
+            }
+        }
+
+        function blobToDataURL(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        function parseAndInitialize(csvText) {
+            setTimeout(() => {
+                try {
+                    cards = parseCSV(csvText);
+                    filteredCards = [...cards];
+                    
+                    if (cards.length === 0) {
+                        throw new Error('No cards found in file. Make sure you exported with the correct format.');
+                    }
+                    
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('appHeader').style.display = 'block';
+                    document.getElementById('navigation').style.display = 'flex';
+                    document.getElementById('cardContainer').style.display = 'flex';
+                    document.getElementById('progress').style.display = 'block';
+                    
+                    showCard(0);
+                } catch (error) {
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('setupInstructions').style.display = 'block';
+                    showError('Error parsing cards: ' + error.message);
+                }
+            }, 100);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const data = [];
+            let headersPassed = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                if (line.startsWith('#')) continue;
+                if (!headersPassed) {
+                    headersPassed = true;
+                    continue;
+                }
+                
+                if (!line.trim()) continue;
+                
+                const columns = line.split('\t');
+                if (columns.length >= 12) {
+                    data.push({
+                        word: columns[3] || '',
+                        meaning: columns[4] || '',
+                        reading: columns[5] || '',
+                        audio: columns[6] || '',
+                        example: columns[7] || '',
+                        exampleReading: columns[8] || '',
+                        exampleTranslation: columns[9] || '',
+                        exampleAudio: columns[10] || '',
+                        image: columns[11] || ''
+                    });
+                }
+                
+                if (i % 100 === 0) {
+                    updateLoadingProgress(`Parsing cards (${i} processed)...`);
+                }
+            }
+            
+            return data;
+        }
+
+        function stripHTML(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        function extractAudioFilename(audioStr) {
+            const match = audioStr.match(/\[sound:(.*?)\]/);
+            return match ? match[1] : null;
+        }
+
+        function extractImageSrc(imgStr) {
+            // Try multiple patterns to handle various quote scenarios
+            let match = imgStr.match(/src=["']([^"']+)["']/);
+            if (!match) {
+                // Handle double-escaped quotes like src=""file.jpg""
+                match = imgStr.match(/src=""([^"]+)""/);
+            }
+            if (!match) {
+                // Handle without quotes
+                match = imgStr.match(/src=([^\s>]+)/);
+            }
+            
+            const result = match ? match[1] : null;
+            if (result) {
+                addDebugLog(`Extracted image filename: "${result}" from: ${imgStr.substring(0, 100)}`);
+            }
+            return result;
+        }
+
+        function showCard(index) {
+            if (filteredCards.length === 0) return;
+            
+            currentCardIndex = index;
+            isFlipped = false;
+            const card = filteredCards[index];
+            
+            addDebugLog(`=== Showing card ${index + 1} ===`);
+            
+            document.getElementById('cardFront').classList.remove('hidden');
+            document.getElementById('cardBack').classList.remove('visible');
+            
+            document.getElementById('word').innerHTML = card.word;
+            document.getElementById('wordBack').innerHTML = card.word;
+            document.getElementById('meaning').innerHTML = card.meaning;
+            document.getElementById('reading').innerHTML = card.reading;
+            
+            // Audio buttons
+            const audioContainer = document.getElementById('audioButtons');
+            audioContainer.innerHTML = '';
+            
+            const audioFile = extractAudioFilename(card.audio);
+            const exampleAudioFile = extractAudioFilename(card.exampleAudio);
+            
+            addDebugLog(`Audio file: ${audioFile || 'none'}`);
+            addDebugLog(`Audio in memory: ${audioFile && mediaFiles[audioFile] ? 'YES' : 'NO'}`, 
+                        audioFile && !mediaFiles[audioFile] ? 'warning' : 'info');
+            
+            if (audioFile && mediaFiles[audioFile]) {
+                audioContainer.innerHTML += `<button class="audio-btn" onclick="event.stopPropagation(); playAudio('${audioFile}')">🔊 Play Word</button>`;
+            } else if (audioFile) {
+                audioContainer.innerHTML += `<button class="audio-btn" disabled>🔊 Audio Missing</button>`;
+                addDebugLog(`Audio file referenced but not found: ${audioFile}`, 'warning');
+            }
+            
+            if (exampleAudioFile && mediaFiles[exampleAudioFile]) {
+                audioContainer.innerHTML += `<button class="audio-btn" onclick="event.stopPropagation(); playAudio('${exampleAudioFile}')">🔊 Play Example</button>`;
+            } else if (exampleAudioFile) {
+                audioContainer.innerHTML += `<button class="audio-btn" disabled>🔊 Example Audio Missing</button>`;
+                addDebugLog(`Example audio file referenced but not found: ${exampleAudioFile}`, 'warning');
+            }
+            
+            // Image - replace src with data URL
+            const imgSrc = extractImageSrc(card.image);
+            const imgElement = document.getElementById('cardImage');
+            
+            addDebugLog(`Image file: ${imgSrc || 'none'}`);
+            addDebugLog(`Image in memory: ${imgSrc && mediaFiles[imgSrc] ? 'YES' : 'NO'}`,
+                       imgSrc && !mediaFiles[imgSrc] ? 'warning' : 'info');
+            
+            if (imgSrc && mediaFiles[imgSrc]) {
+                imgElement.src = mediaFiles[imgSrc];
+                imgElement.style.display = 'block';
+                addDebugLog(`✓ Image loaded successfully`);
+            } else {
+                imgElement.style.display = 'none';
+                if (imgSrc) {
+                    addDebugLog(`✗ Image file referenced but not found: ${imgSrc}`, 'warning');
+                }
+            }
+            
+            // Example
+            const exampleSection = document.getElementById('exampleSection');
+            if (card.example && stripHTML(card.example).trim()) {
+                document.getElementById('example').innerHTML = card.example;
+                document.getElementById('exampleReading').innerHTML = card.exampleReading;
+                document.getElementById('exampleTranslation').innerHTML = card.exampleTranslation;
+                exampleSection.style.display = 'block';
+            } else {
+                exampleSection.style.display = 'none';
+            }
+            
+            updateProgress();
+        }
+
+        function playAudio(filename) {
+            if (mediaFiles[filename]) {
+                const audio = new Audio(mediaFiles[filename]);
+                audio.play().catch(err => {
+                    alert('Error playing audio: ' + err.message);
+                });
+            }
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            document.getElementById('cardFront').classList.toggle('hidden');
+            document.getElementById('cardBack').classList.toggle('visible');
+        }
+
+        function nextCard() {
+            if (currentCardIndex < filteredCards.length - 1) {
+                showCard(currentCardIndex + 1);
+            }
+        }
+
+        function previousCard() {
+            if (currentCardIndex > 0) {
+                showCard(currentCardIndex - 1);
+            }
+        }
+
+        function updateProgress() {
+            document.getElementById('progress').textContent = 
+                `Card ${currentCardIndex + 1} of ${filteredCards.length}`;
+        }
+
+        function searchCards() {
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            if (!query) {
+                filteredCards = [...cards];
+            } else {
+                filteredCards = cards.filter(card => 
+                    stripHTML(card.word).toLowerCase().includes(query) ||
+                    stripHTML(card.meaning).toLowerCase().includes(query) ||
+                    stripHTML(card.reading).toLowerCase().includes(query)
+                );
+            }
+            
+            if (filteredCards.length === 0) {
+                alert('No cards found matching your search.');
+                filteredCards = [...cards];
+            }
+            
+            showCard(0);
+        }
+
+        function resetSearch() {
+            document.getElementById('searchBox').value = '';
+            filteredCards = [...cards];
+            showCard(0);
+        }
+
+        function shuffleCards() {
+            for (let i = filteredCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+            }
+            showCard(0);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('searchBox') === document.activeElement) return;
+            
+            if (e.key === 'ArrowLeft') previousCard();
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                flipCard();
+            }
+        });
+    </script>
+</body>
+</html>
